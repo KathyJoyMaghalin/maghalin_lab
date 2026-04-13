@@ -31,9 +31,9 @@ export default function Login() {
     });
 
     if (error) {
-      setMessage("❌ Unauthorized login.");
+      setMessage("❌ Login failed: " + error.message);
     } else {
-      setMessage("✅ Authorized login!");
+      setMessage("✅ Login successful! Redirecting...");
 
       setTimeout(() => {
         router.push("/dashboard");
