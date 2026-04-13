@@ -3,25 +3,20 @@
 import { useState } from "react";
 import { supabase } from "../lib/supabase";
 import { useRouter } from "next/navigation";
+import LoginUI from "../components/LoginUI";
 
 export default function Login() {
   const router = useRouter();
 
-  const [email, setEmail] = useState<string>("");
-  const [password, setPassword] = useState<string>("");
-  const [message, setMessage] = useState<string>("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [message, setMessage] = useState("");
 
   const handleSignUp = async () => {
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-    });
+    const { error } = await supabase.auth.signUp({ email, password });
 
-    if (error) {
-      setMessage("❌ Sign-up failed: " + error.message);
-    } else {
-      setMessage("✅ Sign-up successful! Now log in.");
-    }
+    if (error) setMessage("❌ " + error.message);
+    else setMessage("✅ Sign-up successful!");
   };
 
   const handleLogin = async () => {
@@ -31,9 +26,9 @@ export default function Login() {
     });
 
     if (error) {
-      setMessage("❌ Login failed: " + error.message);
+      setMessage("❌ Unauthorized login");
     } else {
-      setMessage("✅ Login successful! Redirecting...");
+      setMessage("✅ Authorized login");
 
       setTimeout(() => {
         router.push("/dashboard");
@@ -42,25 +37,14 @@ export default function Login() {
   };
 
   return (
-    <div style={{ textAlign: "center", marginTop: "100px" }}>
-      <h2>Login</h2>
-
-      <input
-        type="email"
-        placeholder="Email"
-        onChange={(e) => setEmail(e.target.value)}
-      /><br /><br />
-
-      <input
-        type="password"
-        placeholder="Password"
-        onChange={(e) => setPassword(e.target.value)}
-      /><br /><br />
-
-      <button onClick={handleLogin}>Log In</button><br /><br />
-      <button onClick={handleSignUp}>Sign Up</button>
-
-      <p>{message}</p>
-    </div>
+    <LoginUI
+      email={email}
+      password={password}
+      message={message}
+      setEmail={setEmail}
+      setPassword={setPassword}
+      handleLogin={handleLogin}
+      handleSignUp={handleSignUp}
+    />
   );
 }
