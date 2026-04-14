@@ -26,7 +26,7 @@ export default function Login() {
     });
 
     if (error) {
-      setMessage("❌ Log in failed" + error.message);
+      setMessage("❌ Log in failed " + error.message);
     } else {
       setMessage("✅ Successfully logged in");
 
