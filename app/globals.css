@@ -1,41 +1,63 @@
-@import "tailwindcss";
-
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background: #ecfdf5; 
+  color: #000000; 
   font-family: Arial, Helvetica, sans-serif;
 }
+
 .container {
   text-align: center;
   margin-top: 100px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  color: #000;
 }
 
 .input {
-  margin: 10px;
-  padding: 8px;
+  width: 280px;
+  padding: 10px 12px;
+  border: 1px solid #22c55e; /* green border */
+  border-radius: 8px;
+  outline: none;
+  background: #ffffff;
+  color: #000;
+  transition: 0.2s;
+}
+
+.input:focus {
+  border-color: #16a34a;
+  box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.25);
 }
 
 .button {
-  margin: 10px;
-  padding: 8px 16px;
+  width: 280px;
+  padding: 10px 12px;
+  border: 1px solid #22c55e;
+  background: #dcfce7; /* very light green */
+  color: #000000;
+  border-radius: 8px;
   cursor: pointer;
+  transition: 0.2s;
+  font-weight: 500;
+}
+
+.button:hover {
+  background: #22c55e;
+  color: white;
+}
+/* TOP RIGHT HEADER */
+.topbar {
+  width: 100%;
+  display: flex;
+  justify-content: flex-end;
+  padding: 20px 30px;
+}
+
+.user-email {
+  border: 1px solid #22c55e;
+  padding: 6px 12px;
+  border-radius: 8px;
+  background: #dcfce7;
+  font-weight: 500;
 }

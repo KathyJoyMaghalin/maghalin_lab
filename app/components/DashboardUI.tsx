@@ -4,10 +4,17 @@ type Props = {
 
 export default function DashboardUI({ email }: Props) {
   return (
-    <div className="container">
-      <h1>Welcome!</h1>
-      <p>You are logged in as:</p>
-      <h3>{email}</h3>
+    <div>
+      {/* Top Right Header */}
+      <div className="topbar">
+        <span className="user-email">{email}</span>
+      </div>
+
+      {/* Main Content */}
+      <div className="container">
+        <h1>Welcome!</h1>
+        <p>You are logged in.</p>
+      </div>
     </div>
   );
 }

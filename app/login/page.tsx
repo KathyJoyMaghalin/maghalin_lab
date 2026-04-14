@@ -26,9 +26,9 @@ export default function Login() {
     });
 
     if (error) {
-      setMessage("❌ Unauthorized login");
+      setMessage("❌ Log in failed" + error.message);
     } else {
-      setMessage("✅ Authorized login");
+      setMessage("✅ Successfully logged in");
 
       setTimeout(() => {
         router.push("/dashboard");
