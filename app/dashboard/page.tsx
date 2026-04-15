@@ -16,5 +16,10 @@ export default function Dashboard() {
     getUser();
   }, []);
 
-  return <DashboardUI email={email} />;
+  const handleLogout = () => {
+    localStorage.removeItem("user");
+    window.location.href = "login";
+  };
+
+  return <DashboardUI email={email} handleLogout={handleLogout} />;
 }
