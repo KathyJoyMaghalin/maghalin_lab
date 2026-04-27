@@ -47,15 +47,6 @@ export default function LoginUI({
         onChange={(e) => setPassword(e.target.value)}
       />
 
-      {/* USERNAME ONLY IN SIGNUP */}
-      {mode === "signup" && (
-        <input
-          placeholder="Username"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-        />
-      )}
-
       {/* ACTION BUTTON */}
       {mode === "login" ? (
         <button onClick={handleLogin}>Log In</button>
