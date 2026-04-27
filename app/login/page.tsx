@@ -8,17 +8,14 @@ import LoginUI from "../components/LoginUI";
 export default function Login() {
   const router = useRouter();
 
+  const [mode, setMode] = useState<"login" | "signup">("login");
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [username, setUsername] = useState("");
   const [message, setMessage] = useState("");
 
-  const handleSignUp = async () => {
-    const { error } = await supabase.auth.signUp({ email, password });
-
-    if (error) setMessage("❌ " + error.message);
-    else setMessage("✅ Sign-up successful!");
-  };
-
+  // LOGIN (email + password)
   const handleLogin = async () => {
     const { error } = await supabase.auth.signInWithPassword({
       email,
@@ -26,23 +23,59 @@ export default function Login() {
     });
 
     if (error) {
-      setMessage("❌ Log in failed " + error.message);
-    } else {
-      setMessage("✅ Successfully logged in");
-
-      setTimeout(() => {
-        router.push("/dashboard");
-      }, 1000);
+      setMessage("❌ " + error.message);
+      return;
     }
+
+    setMessage("✅ Logged in");
+
+    setTimeout(() => {
+      router.push("/dashboard");
+    }, 800);
+  };
+
+  //SIGNUP (email + password + username)
+  const handleSignUp = async () => {
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+    });
+
+    if (error) {
+      setMessage("❌ " + error.message);
+      return;
+    }
+
+    const user = data.user;
+
+    if (!user) return;
+
+    const { error: profileError } = await supabase.from("profiles").insert([
+      {
+        id: user.id,
+        username: username || email.split("@")[0],
+      },
+    ]);
+
+    if (profileError) {
+      setMessage("❌ " + profileError.message);
+      return;
+    }
+
+    setMessage("✅ Account created!");
   };
 
   return (
     <LoginUI
+      mode={mode}
+      setMode={setMode}
       email={email}
       password={password}
+      username={username}
       message={message}
       setEmail={setEmail}
       setPassword={setPassword}
+      setUsername={setUsername}
       handleLogin={handleLogin}
       handleSignUp={handleSignUp}
     />
