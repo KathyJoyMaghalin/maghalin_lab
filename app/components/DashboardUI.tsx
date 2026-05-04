@@ -1,15 +1,19 @@
 type Props = {
   email: string;
   username: string;
+  role?: string;
+
   handleLogout: () => void;
+
   articles: any[];
   handleLike: (articleId: string) => void;
+
   handleComment: (
     articleId: string,
     content: string,
     parentId?: string | null
-    
   ) => void;
+
   topArticles: any[];
   handleShare: (article: any) => void;
 };
@@ -17,6 +21,7 @@ type Props = {
 export default function DashboardUI({
   email,
   username,
+  role,
   handleLogout,
   articles,
   handleLike,
@@ -24,14 +29,16 @@ export default function DashboardUI({
   topArticles,
   handleShare,
 }: Props) {
+  const isAdmin = role === "admin";
+
   return (
     <div>
       {/* TOP BAR */}
       <div className="topbar">
         <span className="user-email">
-          {username || "User"} ({email})
+          {username || email?.split("@")[0] || "User"} ({email}){" "}
+          {isAdmin && "(Admin)"}
         </span>
-       
       </div>
 
       {/* MAIN */}
@@ -39,6 +46,7 @@ export default function DashboardUI({
         <h1>Welcome To Greenies!</h1>
       </div>
 
+      {/* TOP 5 */}
       <div className="top-articles-box">
         <h2>Top 5 Most Popular</h2>
 
@@ -61,22 +69,23 @@ export default function DashboardUI({
               <h3>{article.title}</h3>
               <p>{article.content}</p>
 
-              <a href={article.url} target="_blank">
-                Read full article →
-              </a>
+              {article.url && (
+                <a href={article.url} target="_blank">
+                  Read full article →
+                </a>
+              )}
 
               {/* LIKE */}
               <button onClick={() => handleLike(article.id)}>
                 👍 Like / Unlike
               </button>
-              
 
               <p>Likes: {article.likes?.length || 0}</p>
 
-               {/* SHARE */}
-                <button onClick={() => handleShare(article)}>
-                  🔗 Share
-                </button>
+              {/* SHARE */}
+              <button onClick={() => handleShare(article)}>
+                🔗 Share
+              </button>
 
               {/* COMMENT INPUT */}
               <div style={{ marginTop: "10px" }}>
@@ -90,7 +99,6 @@ export default function DashboardUI({
                     borderRadius: "6px",
                   }}
                 />
-                
 
                 <button
                   style={{ marginLeft: "10px" }}
@@ -111,13 +119,14 @@ export default function DashboardUI({
 
               {/* COMMENTS + REPLIES */}
               {mainComments?.map((c: any) => {
+                const commentId = c.comment_uuid || c.id;
+
                 const replies = article.comments?.filter(
-                  (r: any) => r.parent_id === c.comment_uuid
+                  (r: any) => r.parent_id === commentId
                 );
 
                 return (
-                  <div key={c.comment_uuid || c.id} style={{ marginTop: "15px" }}>
-                    {/* MAIN COMMENT */}
+                  <div key={commentId} style={{ marginTop: "15px" }}>
                     <p>
                       💬 <strong>{c.username || "User"}:</strong> {c.content}
                     </p>
@@ -136,7 +145,7 @@ export default function DashboardUI({
                     <div style={{ marginLeft: "20px", marginTop: "5px" }}>
                       <input
                         placeholder="Reply..."
-                        id={`reply-${c.comment_uuid}`}
+                        id={`reply-${commentId}`}
                         style={{
                           width: "60%",
                           padding: "6px",
@@ -149,17 +158,12 @@ export default function DashboardUI({
                         style={{ marginLeft: "10px" }}
                         onClick={() => {
                           const input = document.getElementById(
-                            `reply-${c.comment_uuid}`
+                            `reply-${commentId}`
                           ) as HTMLInputElement;
 
                           if (!input.value.trim()) return;
 
-                          // 🔥 IMPORTANT FIX: USE comment_uuid (NOT id)
-                          handleComment(
-                            article.id,
-                            input.value,
-                            c.comment_uuid
-                          );
+                          handleComment(article.id, input.value, commentId);
 
                           input.value = "";
                         }}

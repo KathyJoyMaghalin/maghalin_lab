@@ -4,14 +4,19 @@ import { useEffect, useState } from "react";
 import { supabase } from "../lib/supabase";
 import DashboardUI from "../components/DashboardUI";
 
-export default function DashboardPage() {
+export default function AdminPage() {
   const [authUser, setAuthUser] = useState<any>(null);
   const [profile, setProfile] = useState<any>(null);
+
   const [articles, setArticles] = useState<any[]>([]);
+
+  const [title, setTitle] = useState("");
+  const [content, setContent] = useState("");
+  const [image, setImage] = useState("");
+  const [url, setUrl] = useState("");
 
   const getUser = async () => {
     const { data } = await supabase.auth.getUser();
-
     if (!data.user) return;
 
     setAuthUser(data.user);
@@ -26,12 +31,12 @@ export default function DashboardPage() {
   };
 
   const getArticles = async () => {
-    const { data: articlesData } = await supabase.from("articles").select("*");
+    const { data } = await supabase.from("articles").select("*");
     const { data: likesData } = await supabase.from("likes").select("*");
     const { data: commentsData } = await supabase.from("comments").select("*");
     const { data: profilesData } = await supabase.from("profiles").select("*");
 
-    const merged = (articlesData || []).map((a) => ({
+    const merged = (data || []).map((a) => ({
       ...a,
       likes: (likesData || []).filter((l) => l.article_id === a.id),
       comments: (commentsData || [])
@@ -44,6 +49,31 @@ export default function DashboardPage() {
     }));
 
     setArticles(merged);
+  };
+
+  const handleCreate = async () => {
+    if (!title || !content) return;
+
+    await supabase.from("articles").insert([
+      {
+        title,
+        content,
+        image_url: image,
+        url: url,
+      },
+    ]);
+
+    setTitle("");
+    setContent("");
+    setImage("");
+    setUrl("");
+
+    getArticles();
+  };
+
+  const handleDelete = async (id: string) => {
+    await supabase.from("articles").delete().eq("id", id);
+    getArticles();
   };
 
   const handleLike = async (articleId: string) => {
@@ -89,17 +119,16 @@ export default function DashboardPage() {
     getArticles();
   };
 
-  // ✅ ONLY FIXED PART: SHARE FEATURE
+  // ✅ FIXED SHARE (same behavior as dashboard)
   const handleShare = async (article: any) => {
-    const url = `${window.location.origin}/dashboard?article=${article.id}`;
+    const shareUrl = `${window.location.origin}/dashboard?article=${article.id}`;
 
-    // Native mobile share
     if (navigator.share) {
       try {
         await navigator.share({
           title: article.title,
           text: article.content,
-          url,
+          url: shareUrl,
         });
         return;
       } catch (err) {
@@ -107,18 +136,12 @@ export default function DashboardPage() {
       }
     }
 
-    // fallback copy
     try {
-      await navigator.clipboard.writeText(url);
+      await navigator.clipboard.writeText(shareUrl);
       alert("Link copied to clipboard!");
     } catch (err) {
       alert("Failed to copy link");
     }
-  };
-
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-    window.location.href = "/login";
   };
 
   useEffect(() => {
@@ -127,17 +150,59 @@ export default function DashboardPage() {
   }, []);
 
   return (
-    <DashboardUI
-      email={authUser?.email || ""}
-      username={profile?.username || authUser?.email?.split("@")[0]}
-      handleLogout={handleLogout}
-      articles={articles}
-      handleLike={handleLike}
-      handleComment={handleComment}
-      handleShare={handleShare}
-      topArticles={[...articles]
-        .sort((a, b) => (b.likes?.length || 0) - (a.likes?.length || 0))
-        .slice(0, 5)}
-    />
+    <div>
+      {/* ADMIN TOOLS */}
+      <div style={{ padding: 20 }}>
+        <h2>Admin Panel</h2>
+
+        <input
+          placeholder="Title"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+        />
+
+        <input
+          placeholder="Description"
+          value={content}
+          onChange={(e) => setContent(e.target.value)}
+        />
+
+        <input
+          placeholder="Image URL"
+          value={image}
+          onChange={(e) => setImage(e.target.value)}
+        />
+
+        <input
+          placeholder="Article Link (URL)"
+          value={url}
+          onChange={(e) => setUrl(e.target.value)}
+        />
+
+        <button onClick={handleCreate}>Publish</button>
+
+        <hr />
+
+        {articles.map((a) => (
+          <button key={a.id} onClick={() => handleDelete(a.id)}>
+            Delete {a.title}
+          </button>
+        ))}
+      </div>
+
+      {/* SAME UI */}
+      <DashboardUI
+        email={authUser?.email || ""}
+        username={profile?.username || "User"}
+        handleLogout={() => supabase.auth.signOut()}
+        articles={articles}
+        handleLike={handleLike}
+        handleComment={handleComment}
+        handleShare={handleShare}
+        topArticles={[...articles]
+          .sort((a, b) => (b.likes?.length || 0) - (a.likes?.length || 0))
+          .slice(0, 5)}
+      />
+    </div>
   );
 }

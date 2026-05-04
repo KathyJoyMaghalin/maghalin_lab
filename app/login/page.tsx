@@ -5,7 +5,7 @@ import { supabase } from "../lib/supabase";
 import { useRouter } from "next/navigation";
 import LoginUI from "../components/LoginUI";
 
-export default function Login() {
+export default function LoginPage() {
   const router = useRouter();
 
   const [mode, setMode] = useState<"login" | "signup">("login");
@@ -15,7 +15,6 @@ export default function Login() {
   const [username, setUsername] = useState("");
   const [message, setMessage] = useState("");
 
-  // LOGIN (email + password)
   const handleLogin = async () => {
     const { error } = await supabase.auth.signInWithPassword({
       email,
@@ -23,18 +22,21 @@ export default function Login() {
     });
 
     if (error) {
-      setMessage("❌ " + error.message);
+      setMessage(error.message);
       return;
     }
 
-    setMessage("✅ Logged in");
+    setMessage("Logged in");
 
     setTimeout(() => {
-      router.push("/dashboard");
-    }, 800);
+      if (email === "kjmaghalin@gmail.com") {
+        router.push("/admin");
+      } else {
+        router.push("/dashboard");
+      }
+    }, 500);
   };
 
-  //SIGNUP (email + password + username)
   const handleSignUp = async () => {
     const { data, error } = await supabase.auth.signUp({
       email,
@@ -42,27 +44,22 @@ export default function Login() {
     });
 
     if (error) {
-      setMessage("❌ " + error.message);
+      setMessage(error.message);
       return;
     }
 
     const user = data.user;
-
     if (!user) return;
 
-    const { error: profileError } = await supabase.from("profiles").insert([
+    await supabase.from("profiles").insert([
       {
         id: user.id,
         username: username || email.split("@")[0],
+        role: "user",
       },
     ]);
 
-    if (profileError) {
-      setMessage("❌ " + profileError.message);
-      return;
-    }
-
-    setMessage("✅ Account created!");
+    setMessage("Account created!");
   };
 
   return (
